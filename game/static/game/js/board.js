@@ -30,8 +30,7 @@
                 const last = data.move_history[data.move_history.length - 1].notation;
                 
                 if (data.game_status === 'checkmate' || data.game_status === 'stalemate' || data.game_status === 'draw' || last.includes('#')) {
-                    playSound('gameEnd');
-                    return;
+                    return; // endGame() handles terminal audio
                 }
                 
                 if (last.includes('+')) {
@@ -960,8 +959,7 @@
                 let isCelebration = false; // Track if this is a win (not draw/stalemate)
             
                 if (reason === 'checkmate') {
-                    const winner = color === 'white' ? 'Black' : 'White';
-                    const winnerName = color === 'white' ? blackNameLabel.textContent : whiteNameLabel.textContent;
+                    const winnerName = color === 'white' ? whiteNameLabel.textContent : blackNameLabel.textContent;
                     title = '🏆 CHECKMATE! 🏆';
                     message = `${winnerName} WINS!`;
                     isCelebration = true;
@@ -978,15 +976,14 @@
                     };
                     message = drawMessages[drawReason] || 'The game is a draw.';
                 } else if (reason === 'resign') {
-                    const winner = color === 'white' ? 'Black' : 'White';
-                    const winnerName = color === 'white' ? blackNameLabel.textContent : whiteNameLabel.textContent;
-                    const loserName = color === 'white' ? whiteNameLabel.textContent : blackNameLabel.textContent;
+                    const winnerName = color === 'white' ? whiteNameLabel.textContent : blackNameLabel.textContent;
+                    const loserName = color === 'white' ? blackNameLabel.textContent : whiteNameLabel.textContent;
                     title = '🏆 VICTORY! 🏆';
                     message = `${loserName} resigned. ${winnerName} WINS!`;
                     isCelebration = true;
                 } else if (reason === 'timeout') {
-                    const winnerName = color === 'white' ? blackNameLabel.textContent : whiteNameLabel.textContent;
-                    const loserName = color === 'white' ? whiteNameLabel.textContent : blackNameLabel.textContent;
+                    const winnerName = color === 'white' ? whiteNameLabel.textContent : blackNameLabel.textContent;
+                    const loserName = color === 'white' ? blackNameLabel.textContent : whiteNameLabel.textContent;
                     title = 'Timeout!';
                     message = `${loserName} ran out of time. ${winnerName} wins!`;
                 }
@@ -1021,7 +1018,7 @@
                 showStatus(title + ': ' + message, false);
                 
                 // Clean a11y announcement
-                const winnerColor = color === 'white' ? 'Black' : 'White';
+                const winnerColor = color === 'white' ? 'White' : 'Black';
                 let cleanMsg = reason === 'checkmate' || reason === 'resign' 
                     ? `Game over. ${winnerColor} wins by ${reason}.` 
                     : `Game over. Draw by ${reason || 'stalemate'}.`;
@@ -1165,9 +1162,9 @@
                     renderClocks();
 
                     if (turn === 'white' && whiteTime === 0) {
-                        endGame('timeout', 'white');
-                    } else if (turn === 'black' && blackTime === 0) {
                         endGame('timeout', 'black');
+                    } else if (turn === 'black' && blackTime === 0) {
+                        endGame('timeout', 'white');
                     }
                 }, 1000);
             }
@@ -1297,6 +1294,7 @@
                 // Clear celebration effects
                 const overlay = document.getElementById('gameOverOverlay');
                 overlay.classList.remove('game-over-celebration');
+                boardEl.classList.remove('celebrate-win', 'celebrate-loss');
                 const confettiContainer = overlay.querySelector('.confetti-container');
                 if (confettiContainer) {
                     confettiContainer.remove();
@@ -1708,7 +1706,7 @@
 
             function createRipple(el) {
                 const ripple = document.createElement('div');
-                ripple.className = 'drop-ripple';
+                ripple.className = 'ripple';
                 el.appendChild(ripple);
                 setTimeout(() => ripple.remove(), 600);
             }
