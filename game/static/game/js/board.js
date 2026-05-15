@@ -1663,9 +1663,6 @@
                 };
             });
 
-            if (flipBtn) flipBtn.onclick = toggleBoardOrientation;
-
-
             document.addEventListener('keydown', e => {
                 if (e.repeat) return;
 
